@@ -1,0 +1,104 @@
+Project 2 ( _Presentation_ ) -- External Data & Visualization
+===
+
+In this project we're going to create our own, stripped down version of [a nice project Twitter put together](twitter.github.io/interactive/sotu2014) visualizing [President Obama's 2014 State of the Union address](http://www.c-span.org/video/?316796-1/state-union-address) and reactions on Twitter to the address.
+
+![The final product (before you extend it)](./README-media/Screenshot.png)
+
+---
+
+## Trying out the App
+
+Because of [some subtleties](https://stackoverflow.com/questions/8449716/cross-origin-requests-are-only-supported-for-http-but-its-not-cross-domain/14490982#14490982) in how browsers let you use JavaScript to access things not "in the same domain" as your webpage, we have to open Google Chrome in a special mode which allows access to local files.  Analogues may exist for Firefox and Safari, if you're intent on using those browsers you'll need to research the alternatives yourself.
+
+On a Mac:
+1. Open `Terminal.app` in `/Applications/Utilities/`.  If you'd like a quick overview of the Terminal, [Treehouse](http://blog.teamtreehouse.com/introduction-to-the-mac-os-x-command-line) has a nice treatment.
+
+2. At your terminal, paste the following: `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --allow-file-access-from-files` and press Enter.  You'll see a bunch of messages in your Terminal, but Google Chrome should open.
+
+![How your Terminal.app will look after opening; ignore the error messages](./README-media/ChromeTerminal.png)
+
+3. Open `sotu.html` in Chrome.
+
+
+### Commit-by-commit project build-up
+
+We've structured the commits in this repository in an attempt to address one issue folks raised with the initial projects.  People told us that while seeing a functioning example is helpful, understanding the example is different than being able to create something like it (and the attendant understanding) when you begin from scratch.  So, the commits in this repository--similar to the [first HTML/CSS/JS Hangout](https://github.com/DGMD-E-15/HTML-CSS-JS-Hangout-1)--are structured to tell a story, building up this app from scratch.  Please [let us know](mailto:dgmde15@gmail.com) how this works (or doesn't!) for you.
+
+---
+
+## The Data
+
+In this app, we'll be using a bunch of data which Twitter put together from the SOTU.  You can see the code they used to create their app [on GitHub](https://github.com/twitter/interactive/tree/gh-pages/sotu2014).  The file `data/json/values.json` contains a bunch of data about the frequency and volume of keywords tagged with `#SOTU` and one of six subjects (`#energy`, `#jobs`, `#education`, `#fairness`, `#healthcare`, or `#defense`).  The data is stored in "JSON" == "JavaScript Object Notation", which is a common standard for storing data which overlaps with a lot of JavaScript syntax.  We'd encourage you to read more about it [here](http://www.copterlabs.com/blog/json-what-it-is-how-it-works-how-to-use-it/) and take a look at the some of the official materials [here](http://www.json.org/js.html).
+
+You'll also need a copy of the enhanced State of the Union, which you can find [on YouTube](https://www.youtube.com/watch?v=arhBRouSmWs).  You can download a copy locally using a service like [KeepVid](http://keepvid.com/).  For the more command-line oriented folks, We'd recommend [`youtube-dl`](http://rg3.github.io/youtube-dl/download.html).
+
+We wanted a timestamped transcript of the SOTU, which surprisingly the White House does not provide.  C-SPAN provides [something close to our needs](http://www.c-span.org/video/?316796-1/state-union-address), but it was necessary to go through and flesh out the full transcript.  We've done this for you, and the full, timestamped transcript appears in `sotu.html` in `article#sotu-transcript`.  You'll notice that each `div` with `#sotu-transcript` has it's own timestamp, _e.g._
+
+```HTML
+<div id="transcript-time-351">
+	<p>An autoworker fine-tuned some of the best, most fuel-efficient cars in the world, and did his part to help America wean itself off foreign oil.</p>
+</div>
+```
+
+The timestamps in `article#sotu-transcript` encode the number of seconds since the beginning of the SOTU.  (Notice that there is an offset of 306 seconds, where the first/earliest text is timestamped.)
+
+---
+
+## The App
+
+In our app, there are four, primary areas:
+1. The **stacked line plot** illustrates the total volume of #SOTU-tagged tweets through the SOTU itself, but breaks that volume down by additional hashtag.  Mousing over this plot scrubs the video to the associated time.
+
+2. The **video** is the enhanced SOTU video which _also_ includes links to the six hashtags below.  Each hashtag links to the point in the SOTU where that hashtag became the plurality of the #SOTU hashtags.
+
+3. The **transcript** is connected to the timeline of the video, so scrubbing the plot scrubs the video _and_ the transcript.
+
+4. The **map + chart**, which together indicate the total engagement, broken down by state, with each of the hashtags, across different time intervals throughout the SOTU.  This data is coming from Twitter's [`values.json`](https://github.com/twitter/interactive/blob/gh-pages/sotu2014/data/json/values.json).
+
+
+## Extensions
+
+After walking through the commits of this project and playing around with its behavior, perhaps inspecting it to unpack how some of it works, consider trying to implement some of the following extensions (arranged in order of difficulty):
+
+#### 1. Make the red scrubbing bar stay visible and scroll with the video
+
+Currently, the red bar only appears when you scrub.  Keep it visible and make it move with the video's progress.
+
+![Illustration of suggested extension #1](./README-media/Extension-1.png)
+
+#### 2. Connect scrolling the transcript to the video and plot
+
+You'll notice that currently, when you scroll the transcript, neither the video nor the location of the red bar on the plot change.  Implement this.
+
+![Illustration of suggested extension #2](./README-media/Extension-2.png)
+
+#### 3. Scroll the text as the video plays
+
+Currently, while scrubbing the plot scrubs the text and video, as the video plays the text does not move.  Change this so that the video's progression scrolls the text.
+
+![Illustration of suggested extension #3](./README-media/Extension-3.png)
+
+### 4. Highlight the current text being spoken in the video
+
+Of course, this is only simple to the resolution of the timestamps provided--_i.e._ not word-by-word, but div-by-div.
+
+![Illustration of suggested extension #4](./README-media/Extension-4.png)
+
+### 5. Recreate the streamgraph dynamically
+
+The plot at the top is called a ["streamgraph"](https://en.wikipedia.org/wiki/Streamgraph)--it's basically the continuous version of a stacked bar/stacked area chart.  You can build these surprisingly simply with [d3.js](http://d3js.org/), _e.g._ take a look at [this](http://bl.ocks.org/mbostock/4060954) streamgraph example or [this](http://bl.ocks.org/mbostock/3885211) stacked area chart.  Try recreating the streamgraph at the top with d3. (We'll also show you how to create this effect using [Processing.js](http://processingjs.org/).)
+
+![Illustration of suggested extension #5](./README-media/Extension-5.png)
+
+### 6. Add a dynamic background to the streamgraph incorporating screenshots from the video
+
+It is possible to take a screenshot of a running HTML5 video using JavaScript (see [this](http://html5multimedia.com/code/ch9/video-canvas-screenshot.html) example and [this](http://html5doctor.com/video-canvas-magic/) explanation).  Implement a feature where as the video plays, the background of the streamgraph is filled with screenshots from the relevant parts of the SOTU.
+
+![Illustration of suggested extension #6](./README-media/Extension-6.png)
+
+---
+
+## Questions?
+
+Please file an Issue on this project!  You can read a bit more about GitHub's Issues feature [here](https://github.com/blog/831-issues-2-0-the-next-generation).  If you'd like your question to be private, [email us](mailto:dgmde15@gmail.com); however, if possible, please include a link to relevant code in your own repository if applicable (as opposed to copy-pasting code into an email).
