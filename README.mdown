@@ -11,7 +11,11 @@ In this project we're going to create our own, stripped down version of [a nice 
 
 Because of [some subtleties](https://stackoverflow.com/questions/8449716/cross-origin-requests-are-only-supported-for-http-but-its-not-cross-domain/14490982#14490982) in how browsers let you use JavaScript to access things not "in the same domain" as your webpage, we have to open Google Chrome in a special mode which allows access to local files.  Analogues may exist for Firefox and Safari, if you're intent on using those browsers you'll need to research the alternatives yourself.
 
-On a Mac:
+
+### On a Mac:
+
+0. Close all instances of Google Chrome running on your computer.  If you see any errors referring to "Unable to obtain profile lock," this means you _haven't_ done this yet.
+
 1. Open `Terminal.app` in `/Applications/Utilities/`.  If you'd like a quick overview of the Terminal, [Treehouse](http://blog.teamtreehouse.com/introduction-to-the-mac-os-x-command-line) has a nice treatment.
 
 2. At your terminal, paste the following: `/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --allow-file-access-from-files` and press Enter.  You'll see a bunch of messages in your Terminal, but Google Chrome should open.
@@ -19,6 +23,17 @@ On a Mac:
 ![How your Terminal.app will look after opening; ignore the error messages](./README-media/ChromeTerminal.png)
 
 3. Open `sotu.html` in Chrome.
+
+
+### On Windows:
+
+0. Close all instances of Google Chrome completely.
+
+1. Right-click on your Chrome shortcut and select "Properties"
+
+2. Add `--allow-file-access-from-files` to the end of the "Target" field
+
+3. Click "OK" and re-open Chrome
 
 
 ### Commit-by-commit project build-up
