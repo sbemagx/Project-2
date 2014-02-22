@@ -44,9 +44,12 @@ function hashtagMousemove(e) {
 
 hashtagPlot.addEventListener('mouseout', playVideo, false);
 function playVideo(e) {
-	scrubBar.style.visibility = "hidden";
 	SOTUvideo.play();
 }
+
+SOTUvideo.addEventListener("timeupdate", function(e) {
+	scrubBar.style.left = parseInt(1280 * SOTUvideo.currentTime/SOTUvideo.duration) + "px";
+});
 
 function updateScrubBar(e) {
 	// A function to make the scrubBar follow the mouse
