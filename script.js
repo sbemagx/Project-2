@@ -42,6 +42,10 @@ function hashtagMousemove(e) {
 	updateTranscript(e);
 }
 
+transcript.addEventListener('scroll', function(e) {
+ console.log("love me");
+});
+
 hashtagPlot.addEventListener('mouseout', playVideo, false);
 function playVideo(e) {
 	SOTUvideo.play();
