@@ -1,7 +1,8 @@
 var hashtagPlot = document.getElementById('hashtag-plot');
-var scrubBar = document.getElementById('scrub-bar');
-var SOTUvideo = document.getElementById('sotu-video');
+var scrubBar    = document.getElementById('scrub-bar');
+var SOTUvideo   = document.getElementById('sotu-video');
 var videoOffset = 306;
+
 
 // Pull out all the transcript timestamps for use throughout
 var transcript = document.getElementById('sotu-transcript');
@@ -12,8 +13,19 @@ function extractTimestamps() {
 	for (var i = 0; i < stampedDivs.length; i++) {
 		timestamps[i] = parseInt(stampedDivs[i].id.split('-')[2], 10);
 	}
-
 	return timestamps;
+}
+
+// for each timestamp div add a mouseover listener
+var stampedDivs = transcript.querySelectorAll('div');
+for (var i = 0; i < stampedDivs.length; i++) {
+	stampedDivs[i].addEventListener('mouseenter', scrollMiddle, false);
+}
+
+// scroll/scrub to the appropriate time
+function scrollMiddle(e) {
+	scrollTime = parseInt(this.id.split('-')[2], 10);
+	SOTUvideo.currentTime = scrollTime - videoOffset;
 }
 
 // Initialize these for loading later, after window.onload
@@ -41,10 +53,6 @@ function hashtagMousemove(e) {
 	updateVideo(e);
 	updateTranscript(e);
 }
-
-transcript.addEventListener('scroll', function(e) {
- console.log("love me");
-});
 
 hashtagPlot.addEventListener('mouseout', playVideo, false);
 function playVideo(e) {
@@ -84,7 +92,7 @@ function nearestStamp(fractionScrubbed) {
 	// Figure out what the closest timestamp we have is to the current amount of scrubbing
 	var timestampEquivalent = fractionScrubbed * SOTUvideo.duration + videoOffset; // IF we had a timestamp, what would it be?
 	for (var i = 0; i < timestamps.length - 1; i++) {
-		if ( timestamps[i+1] > timestampEquivalent ) { // Find teh first timestamp our guess is greater than
+		if ( timestamps[i+1] > timestampEquivalent ) { // Find the first timestamp our guess is greater than
 			return timestamps[i];
 		}
 	}
