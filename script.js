@@ -3,6 +3,10 @@ var scrubBar    = document.getElementById('scrub-bar');
 var SOTUvideo   = document.getElementById('sotu-video');
 var videoOffset = 306;
 
+// Initialize these for loading later, after window.onload
+var nation = null;
+var statePaths = null;
+var stateAbbreviations = null;
 
 // Pull out all the transcript timestamps for use throughout
 var transcript = document.getElementById('sotu-transcript');
@@ -19,19 +23,10 @@ function extractTimestamps() {
 // for each timestamp div add a mouseover listener
 var stampedDivs = transcript.querySelectorAll('div');
 for (var i = 0; i < stampedDivs.length; i++) {
-	stampedDivs[i].addEventListener('mouseenter', scrollMiddle, false);
+    stampedDivs[i].addEventListener('mouseenter', highlightPassage, false);
+    stampedDivs[i].addEventListener('mouseleave', normalizePassage, false);    
+	stampedDivs[i].addEventListener('click', scrollMiddle, false);
 }
-
-// scroll/scrub to the appropriate time
-function scrollMiddle(e) {
-	scrollTime = parseInt(this.id.split('-')[2], 10);
-	SOTUvideo.currentTime = scrollTime - videoOffset;
-}
-
-// Initialize these for loading later, after window.onload
-var nation = null;
-var statePaths = null;
-var stateAbbreviations = null;
 
 // Hardcoded colors for each hashtag, grabbed from the twitter site with https://en.wikipedia.org/wiki/DigitalColor_Meter
 var hashtagColors = {
@@ -47,11 +42,18 @@ var hashtagColors = {
 // Handling the hashtagPlot and scrubBar
 
 // Run hashtagMousemove every time the mouse moves above the hashtagPlot
-hashtagPlot.addEventListener('mousemove', hashtagMousemove, false);
+hashtagPlot.addEventListener('mousedown', addMousemove, false);
+function addMousemove(e) {
+	hashtagPlot.addEventListener('mousemove', hashtagMousemove, false);
+}
 function hashtagMousemove(e) {
 	updateScrubBar(e);
 	updateVideo(e);
 	updateTranscript(e);
+}
+hashtagPlot.addEventListener('mouseup', removeMousemove, false);
+function removeMousemove(e) {
+	hashtagPlot.removeEventListener('mousemove', hashtagMousemove, false);
 }
 
 hashtagPlot.addEventListener('mouseout', playVideo, false);
@@ -59,16 +61,10 @@ function playVideo(e) {
 	SOTUvideo.play();
 }
 
-SOTUvideo.addEventListener("timeupdate", function(e) {
-	scrubBar.style.left = parseInt(1280 * SOTUvideo.currentTime/SOTUvideo.duration) + "px";
-});
-
 function updateScrubBar(e) {
 	// A function to make the scrubBar follow the mouse
-
 	scrubBar.style.visibility = 'visible';
 	scrubBar.style.left = e.clientX - position(hashtagPlot).x; // e.clientX is the mouse position
-
 	scrubBar.fractionScrubbed = parseInt(scrubBar.style.left, 10)/hashtagPlot.offsetWidth;
 }
 
@@ -85,7 +81,10 @@ function updateTranscript(e) {
 
 function scrollToTimestamp(timestamp) {
 	var target = transcript.querySelector('#transcript-time-' + timestamp);
-	document.getElementById('sotu-transcript').scrollTop = target.offsetTop;
+	document.getElementById('sotu-transcript').scrollTop = target.offsetTop - 330;
+	var x = document.getElementById('#transcript-time-' + timestamp);
+	console.log('scrollToTimestamp: getting element: ' + '#transcript-time-' + timestamp);
+	x.highlightPassage();
 }
 
 function nearestStamp(fractionScrubbed) {
@@ -93,9 +92,11 @@ function nearestStamp(fractionScrubbed) {
 	var timestampEquivalent = fractionScrubbed * SOTUvideo.duration + videoOffset; // IF we had a timestamp, what would it be?
 	for (var i = 0; i < timestamps.length - 1; i++) {
 		if ( timestamps[i+1] > timestampEquivalent ) { // Find the first timestamp our guess is greater than
+			console.log('nearestStamp: x scrolling to nearest timestamp: ' + timestamps[i]);
 			return timestamps[i];
 		}
 	}
+	console.log('nearestStamp: y scrolling to nearest timestamp: ' + timestamps[timestamps.length - 1]);
 	return timestamps[timestamps.length - 1];
 }
 
@@ -115,6 +116,21 @@ function navClick(e) {
 	updateTranscript(e);
 }
 
+SOTUvideo.addEventListener("timeupdate", syncVideotoOthers, false);
+function syncVideotoOthers(e) {
+	scrubBar.style.left = parseInt(1280 * SOTUvideo.currentTime/SOTUvideo.duration) + "px";
+	videoLocation = Math.ceil(SOTUvideo.currentTime) + videoOffset;
+	if (timestamps.indexOf(videoLocation) >= 0) {
+		console.log("found member " + timestamps[timestamps.indexOf(videoLocation)]);
+		//scrollToTimestamp(timestamps[timestamps.indexOf(videoLocation)]);
+	}
+}
+
+// scroll/scrub to the appropriate time
+function scrollMiddle(e) {
+	scrollTime = parseInt(this.id.split('-')[2], 10);
+	SOTUvideo.currentTime = scrollTime - videoOffset;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Adding the map coloring functionality
@@ -327,4 +343,12 @@ function interpolate(value, from, to) {
 	var ratio = toSpread/fromSpread;
 
 	return (value - from[0])*ratio + to[0];
+}
+
+function highlightPassage(e) {
+	this.style.backgroundColor = "#ffc";
+}
+
+function normalizePassage(e) {
+	this.style.backgroundColor = "#fff";
 }
