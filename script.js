@@ -126,10 +126,12 @@ function syncVideotoOthers(e) {
 	scrubBar.style.left = parseInt(1280 * SOTUvideo.currentTime/SOTUvideo.duration) + "px";
 	videoLocation = Math.ceil(SOTUvideo.currentTime) + videoOffset;
 	if (timestamps.indexOf(videoLocation) >= 0) {
+		updateTranscriptByCurrenttime();
 		console.log("found member " + timestamps[timestamps.indexOf(videoLocation)]);
 		var target = document.getElementById("transcript-time-" + timestamps[timestamps.indexOf(videoLocation)]);
 		normalizeAll();
 		highlightById(target);
+
 	}
 }
 
@@ -368,7 +370,6 @@ function highlightById(divId) {
 }
 
 function highlightPassage(e) {
-	console.log('highlightPassage: current color' + this.style.backgroundColor);
 		this.style.backgroundColor = "#ffc";
 }
 
