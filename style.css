@@ -22,7 +22,6 @@ html, body {
 #scrub-bar {
 	position: relative;
 	left: 0;
-	visibility: hidden; /* We hide it so that it doesn't show up by default */
 	width: 2px;
 	height: 100%;
 	background-color: red;

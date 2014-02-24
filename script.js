@@ -24,7 +24,7 @@ function extractTimestamps() {
 var stampedDivs = transcript.querySelectorAll('div');
 for (var i = 0; i < stampedDivs.length; i++) {
     stampedDivs[i].addEventListener('mouseenter', highlightPassage, false);
-    stampedDivs[i].addEventListener('mouseleave', normalizePassage, false);    
+    stampedDivs[i].addEventListener('mouseleave', updateColorByCurrenttime, false);    
 	stampedDivs[i].addEventListener('click', scrollMiddle, false);
 }
 
@@ -80,8 +80,10 @@ function updateTranscript(e) {
 }
 function updateTranscriptByCurrenttime(e) {
 	for (var i = 0; i < timestamps.length - 1; i++) {
-		if ( timestamps[i+1] > Math.ceil(SOTUvideo.currentTime) + videoOffset) { // Find the first timestamp our guess is greater than
+		if ( timestamps[i+1] > Math.ceil(SOTUvideo.currentTime) + videoOffset) { 
 			scrollToTimestamp(timestamps[i]);
+			normalizeAll();
+			highlightById(document.getElementById('transcript-time-' +timestamps[i]));
 			break;
 		}
 	}
@@ -126,7 +128,7 @@ function syncVideotoOthers(e) {
 	if (timestamps.indexOf(videoLocation) >= 0) {
 		console.log("found member " + timestamps[timestamps.indexOf(videoLocation)]);
 		var target = document.getElementById("transcript-time-" + timestamps[timestamps.indexOf(videoLocation)]);
-		//normalizeAll();
+		normalizeAll();
 		highlightById(target);
 	}
 }
@@ -357,19 +359,25 @@ function interpolate(value, from, to) {
 
 function normalizeAll(e) {
 	for (var i = 0; i < timestamps.length - 1; i++) {
-		var target = document.getElementById('#transcript-time-' + timestamps[i]);
-		console.log('normalizeAll: ' + '#transcript-time-' + timestamps[i]);
-		target.style.backgroundColor("#fff");
+		var target = document.getElementById('transcript-time-' + timestamps[i]);
+		target.style.backgroundColor = "#fff";
 	}
 }
 function highlightById(divId) {
-	divId.style.backgroundColor("#ffc");
+	divId.style.backgroundColor = "#eee";
 }
 
 function highlightPassage(e) {
-	this.style.backgroundColor = "#ffc";
+	console.log('highlightPassage: current color' + this.style.backgroundColor);
+		this.style.backgroundColor = "#ffc";
 }
 
-function normalizePassage(e) {
-	this.style.backgroundColor = "#fff";
+function updateColorByCurrenttime(e) {
+	for (var i = 0; i < timestamps.length - 1; i++) {
+		if ( timestamps[i+1] > Math.ceil(SOTUvideo.currentTime) + videoOffset) { 
+			normalizeAll();
+			highlightById(document.getElementById('transcript-time-' +timestamps[i]));
+			break;
+		}
+	}
 }
