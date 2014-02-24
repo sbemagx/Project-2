@@ -91,7 +91,7 @@ function updateTranscriptByCurrenttime(e) {
 
 function scrollToTimestamp(timestamp) {
 	var target = transcript.querySelector('#transcript-time-' + timestamp);
-	document.getElementById('sotu-transcript').scrollTop = target.offsetTop - 330;
+	document.getElementById('sotu-transcript').scrollTop = target.offsetTop - 380;
 }
 
 function nearestStamp(fractionScrubbed) {
@@ -151,6 +151,7 @@ function scrollMiddle(e) {
 window.onload = function () {
 	// We have to make sure that we have the nation and the states 
 	// But because of the size and loading time of the SVG, we have to attach it to an event handler for window.onload to make sure it's fully loaded 
+
 	nation = document.getElementsByTagName('object')[0].contentDocument.getElementsByTagName('svg')[0];
 	statePaths = nation.querySelectorAll('.state');
 	
@@ -206,10 +207,15 @@ function dominantHashtagAt(time) {
 
 function recolorNation(hashtag) {
 	// A function to go through every state and color it correctly for a given hashtag
-	for ( var k = 0; k < stateAbbreviations.length; k++ ) {
-		var stateAbbreviation = stateAbbreviations[k];
-		var state = nation.getElementById(stateAbbreviation);
-		colorState(state, getIntervalAt(SOTUvideo.currentTime), hashtag);
+	try {
+		for ( var k = 0; k < stateAbbreviations.length; k++ ) {
+			var stateAbbreviation = stateAbbreviations[k];
+			var state = nation.getElementById(stateAbbreviation);
+			colorState(state, getIntervalAt(SOTUvideo.currentTime), hashtag);
+		}
+	}
+	catch(err) {
+		// throws this the first time it loads.
 	}
 }
 

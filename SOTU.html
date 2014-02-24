@@ -6,10 +6,14 @@
 	</head>
 
 	<body>
-		<div id='hashtag-plot'>
-			<div id='scrub-bar'></div>
+		<div id='scrub-container'>
+			<div id='hashtag-plot'>
+				<svg width="1280" height="300">
+	  				<rect x='0' y='0' width="1280" height="300" fill="grey" />
+	 			</svg>
+				<div id='scrub-bar'></div>
+			</div>
 		</div>
-
 		<div id='container'>
 			<div class='panel' id='left'>
 				<video id='sotu-video' src='./media/sotu.mp4' controls></video>
@@ -500,8 +504,10 @@
 			</div>
 		</div>
 
+
 		<script src='./data/values.json'></script> <!-- Note that tweetValues is defined in here, the json is executable JavaScript -->
 		<script src='./script.js'></script>
+		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	</body>
 
 </html>

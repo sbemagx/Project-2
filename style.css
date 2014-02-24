@@ -8,20 +8,23 @@ html, body {
 /* Hashtag Plot */
 
 #hashtag-plot {
-	background: url('./media/hashtagVolume.png'); /* screenshot from twitter's site */
-	background-size: contain; /* Auto-scaling the image to fit in the div */
+	/* background: url('./media/hashtagVolume.png'); /* screenshot from twitter's site */
+	/* background-size: contain; /* Auto-scaling the image to fit in the div */
 
 	width: 1280px;
 	height: 300px;
-
+	margin-top: 50px;
 	margin-right: auto;
 	margin-left: auto;
 	margin-bottom: 1em;
+	position: relative;
+
 }
 
 #scrub-bar {
-	position: relative;
+	position: absolute;
 	left: 0;
+	top:0;
 	width: 2px;
 	height: 100%;
 	background-color: red;
