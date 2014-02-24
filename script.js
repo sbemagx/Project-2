@@ -127,7 +127,6 @@ function syncVideotoOthers(e) {
 	videoLocation = Math.ceil(SOTUvideo.currentTime) + videoOffset;
 	if (timestamps.indexOf(videoLocation) >= 0) {
 		updateTranscriptByCurrenttime();
-		console.log("found member " + timestamps[timestamps.indexOf(videoLocation)]);
 		var target = document.getElementById("transcript-time-" + timestamps[timestamps.indexOf(videoLocation)]);
 		normalizeAll();
 		highlightById(target);
