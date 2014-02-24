@@ -78,13 +78,18 @@ function updateVideo(e) {
 function updateTranscript(e) {
 	scrollToTimestamp(nearestStamp(scrubBar.fractionScrubbed));
 }
+function updateTranscriptByCurrenttime(e) {
+	for (var i = 0; i < timestamps.length - 1; i++) {
+		if ( timestamps[i+1] > Math.ceil(SOTUvideo.currentTime) + videoOffset) { // Find the first timestamp our guess is greater than
+			scrollToTimestamp(timestamps[i]);
+			break;
+		}
+	}
+}
 
 function scrollToTimestamp(timestamp) {
 	var target = transcript.querySelector('#transcript-time-' + timestamp);
 	document.getElementById('sotu-transcript').scrollTop = target.offsetTop - 330;
-	var x = document.getElementById('#transcript-time-' + timestamp);
-	console.log('scrollToTimestamp: getting element: ' + '#transcript-time-' + timestamp);
-	x.highlightPassage();
 }
 
 function nearestStamp(fractionScrubbed) {
@@ -92,11 +97,9 @@ function nearestStamp(fractionScrubbed) {
 	var timestampEquivalent = fractionScrubbed * SOTUvideo.duration + videoOffset; // IF we had a timestamp, what would it be?
 	for (var i = 0; i < timestamps.length - 1; i++) {
 		if ( timestamps[i+1] > timestampEquivalent ) { // Find the first timestamp our guess is greater than
-			console.log('nearestStamp: x scrolling to nearest timestamp: ' + timestamps[i]);
 			return timestamps[i];
 		}
 	}
-	console.log('nearestStamp: y scrolling to nearest timestamp: ' + timestamps[timestamps.length - 1]);
 	return timestamps[timestamps.length - 1];
 }
 
@@ -122,8 +125,15 @@ function syncVideotoOthers(e) {
 	videoLocation = Math.ceil(SOTUvideo.currentTime) + videoOffset;
 	if (timestamps.indexOf(videoLocation) >= 0) {
 		console.log("found member " + timestamps[timestamps.indexOf(videoLocation)]);
-		//scrollToTimestamp(timestamps[timestamps.indexOf(videoLocation)]);
+		var target = document.getElementById("transcript-time-" + timestamps[timestamps.indexOf(videoLocation)]);
+		//normalizeAll();
+		highlightById(target);
 	}
+}
+
+SOTUvideo.addEventListener("seeked", updateTranscriptAfterSeek, false);
+function updateTranscriptAfterSeek(e) {
+	updateTranscriptByCurrenttime();
 }
 
 // scroll/scrub to the appropriate time
@@ -343,6 +353,17 @@ function interpolate(value, from, to) {
 	var ratio = toSpread/fromSpread;
 
 	return (value - from[0])*ratio + to[0];
+}
+
+function normalizeAll(e) {
+	for (var i = 0; i < timestamps.length - 1; i++) {
+		var target = document.getElementById('#transcript-time-' + timestamps[i]);
+		console.log('normalizeAll: ' + '#transcript-time-' + timestamps[i]);
+		target.style.backgroundColor("#fff");
+	}
+}
+function highlightById(divId) {
+	divId.style.backgroundColor("#ffc");
 }
 
 function highlightPassage(e) {
