@@ -168,89 +168,157 @@ window.onload = function () {
 	////////////////////////////////////////////////////////////////////////////////
 	// D3
 
-	var n = 20, // number of layers
-	    m = 200, // number of samples per layer
-	    data0 = d3.layout.stack().offset("wiggle")(stream_layers(n, m)),
-	    data1 = d3.layout.stack().offset("wiggle")(stream_layers(n, m)),
-	    color = d3.interpolateRgb("#aad", "#556");
+	// initialize a bunch of arrays to hold the data
+	var plotData = new Array();
+	for (i = 0; i < 9; ++i) plotData[i] = new Array;
 
-	var w = 1280,
-	    h = 300,
-	    mx = m - 1,
-	    my = d3.max(data0.concat(data1), function(d) {
-	      return d3.max(d, function(d) {
-	        return d.y0 + d.y;
-	      });
-	    });
+	/* 
+
+	here's the data structure that we're interested in:
+
+	{
+	    "2014-01-29 02:15:::2014-01-29 02:15": {
+	        "total": [
+	            [
+	                "#education",
+	                0.005742582086306759
+	            ],
+	            [
+	                "#fairness",
+	                0.0007116452843615948
+	            ],
+	            [
+	                "#jobs",
+	                0.0007017613220787949
+	            ],
+	            [
+	                "#energy",
+	                0.0006523415106647954
+	            ],
+	            [
+	                "#healthcare",
+	                0.00048431415185719653
+	            ],
+	            [
+	                "#taxes",
+	                0.0003558226421807974
+	            ],
+	            [
+	                "#defense",
+	                0.0002965188684839979
+	            ],
+	            [
+	                "#immigration",
+	                0.00019767924565599858
+	            ],
+	            [
+	                "#budget",
+	                0.0001680273588075988
+	            ]
+	        ]
+	    }
+	}
+
+	This is the format we are going to:
+
+	var layers = [
+		{
+			"name": "apples",
+			"values": [
+			  { "x": 0, "y":  91},
+			  { "x": 1, "y": 290},
+			  { "x": 2, "y": 10}
+			]
+			},
+			{  
+			"name": "oranges",
+			"values": [
+			  { "x": 0, "y":  9},
+			  { "x": 1, "y": 49},
+			  { "x": 2, "y": 190}
+			]
+		}
+	];
+	*/
+
+	var tweetIntervals = Object.keys(tweetValues);
+	for (var i = 0; i < tweetIntervals.length; i++) {
+		// each hashtag will be a layer
+		// for each time interval, stuff the totals into our new data structure. the values will be the y data and the iterator will be the x data
+
+		// tweetValues["2014-01-29 02:15:::2014-01-29 02:15"].total[0][1]
+		plotData[0][i] = tweetValues[tweetIntervals[i]].total[0][1]; // #education
+		plotData[1][i] = tweetValues[tweetIntervals[i]].total[1][1]; // #fairness
+		plotData[2][i] = tweetValues[tweetIntervals[i]].total[2][1]; // #jobs
+		plotData[3][i] = tweetValues[tweetIntervals[i]].total[3][1]; // #energy
+		plotData[4][i] = tweetValues[tweetIntervals[i]].total[4][1]; // #healthcare
+		plotData[5][i] = tweetValues[tweetIntervals[i]].total[5][1]; // #taxes
+		plotData[6][i] = tweetValues[tweetIntervals[i]].total[6][1]; // #defense										
+		plotData[7][i] = tweetValues[tweetIntervals[i]].total[7][1]; // #immigration												
+		plotData[8][i] = tweetValues[tweetIntervals[i]].total[8][1]; // #budget								
+	}
+
+	// init our new array and objects that will contain data that gets fed to the d3 stack function
+	var plotLayers = new Array();
+	for (i = 0; i < 9; ++i) plotLayers[i] = new Object;
+
+	// give each layer a name (we might use this later)
+	plotLayers[0].name = 'education';
+	plotLayers[1].name = 'fairness';
+	plotLayers[2].name = 'jobs';
+	plotLayers[3].name = 'energy';
+	plotLayers[4].name = 'healthcare';
+	plotLayers[5].name = 'taxes';
+	plotLayers[6].name = 'defense';
+	plotLayers[7].name = 'immigration';
+	plotLayers[8].name = 'budget';
+
+	// iterate through, pulling data from plotData and scaling it up (might do something sharper than n*1000 once we get this working).
+	for (a = 0; a < 9; a++) {
+		plotLayers[a].values = new Array();
+		for (i = 0; i < 63; i++) {
+			plotLayers[a].values[i] = new Object;
+			plotLayers[a].values[i].x = i;
+			plotLayers[a].values[i].y = plotData[0][i] * 1000;
+		
+		console.log('DEBUG: plotlayers name: ' + plotLayers[a].name);
+		console.log('DEBUG: plotlayers x value: ' + plotLayers[a].values[i].x);
+		console.log('DEBUG: plotlayers y value: ' + plotLayers[a].values[i].y);
+		}
+	}
+
+	var width = 1280,
+	    height = 300;
+
+	var stack = d3.layout.stack()
+	    .offset("wiggle")
+	    .values(function(d) { return d.values; });
+
+	var svg = d3.select("#hashtag-plot").append("svg")
+	    .attr("width", width)
+	    .attr("height", height);
+
+	var x = d3.scale.linear()
+	    .domain([0, 8])
+	    .range([0, width]);
+
+	var y = d3.scale.linear()
+	    .domain([0, d3.max(plotLayers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); })])
+	    .range([height, 0]);
+
+	var color = d3.scale.linear()
+	    .range(["#aad", "#556"]);
 
 	var area = d3.svg.area()
-	    .x(function(d) { return d.x * w / mx; })
-	    .y0(function(d) { return h - d.y0 * h / my; })
-	    .y1(function(d) { return h - (d.y + d.y0) * h / my; });
+	    .x(function(d) { return x(d.x); })
+	    .y0(function(d) { return y(d.y0); })
+	    .y1(function(d) { return y(d.y0 + d.y); });
 
-	console.log('here');
-	var vis = d3.select("#hashtag-plot")
-	  .append("svg:svg")
-	    .attr("width", w)
-	    .attr("height", h);
-
-	vis.selectAll("path")
-	    .data(data0)
-	  .enter().append("svg:path")
-	    .style("fill", function() { return color(Math.random()); })
-	    .attr("d", area);
-
-	function transition() {
-	  d3.selectAll("path")
-	      .data(function() {
-	        var d = data1;
-	        data1 = data0;
-	        return data0 = d;
-	      })
-	    .transition()
-	      .duration(2500)
-	      .attr("d", area);
-	}
-
-
-	/* Inspired by Lee Byron's test data generator. */
-	function stream_layers(n, m, o) {
-	  if (arguments.length < 3) o = 0;
-	  function bump(a) {
-	    var x = 1 / (.1 + Math.random()),
-	        y = 2 * Math.random() - .5,
-	        z = 10 / (.1 + Math.random());
-	    for (var i = 0; i < m; i++) {
-	      var w = (i / m - y) * z;
-	      a[i] += x * Math.exp(-w * w);
-	    }
-	  }
-	  return d3.range(n).map(function() {
-	      var a = [], i;
-	      for (i = 0; i < m; i++) a[i] = o + o * Math.random();
-	      for (i = 0; i < 5; i++) bump(a);
-	      return a.map(stream_index);
-	    });
-	}
-
-	/* Another layer generator using gamma distributions. */
-	function stream_waves(n, m) {
-	  return d3.range(n).map(function(i) {
-	    return d3.range(m).map(function(j) {
-	        var x = 20 * j / m - i / 3;
-	        return 2 * x * Math.exp(-.5 * x);
-	      }).map(stream_index);
-	    });
-	}
-
-	function stream_index(d, i) {
-	  return {x: i, y: Math.max(0, d)};
-	}
-
-
-
-
-
+	svg.selectAll("path")
+	    .data(stack(plotLayers))
+	  	.enter().append("path")
+	  	.attr("d", area)
+    	.style("fill", function() { return color(Math.random()); });;
 
 };
 
@@ -317,10 +385,11 @@ function UTCtoNearestAvailableIntervalData(UTCdate) {
 
 	// Get all the tweetIntervals from the tweetValues we loaded from values.json
 	var tweetIntervals = Object.keys(tweetValues);
+
 	for (var i = 0; i < tweetIntervals.length; i++) {
 		// Tweets are indexed by interval (e.g. 2014-01-29 02:15:::2014-01-29 02:15), and we just want the start of the interval
 		var tweetIntervalStart = new Date(tweetIntervals[i].split(':::')[0]);
-		// As we go through, check if the time we just converted is after the time we're looking fo
+		// As we go through, check if the time we just converted is after the time we're looking for
 		if (UTCdate < tweetIntervalStart) {
 			return tweetValues[tweetIntervals[i-1]];
 		}
