@@ -287,38 +287,59 @@ window.onload = function () {
 		}
 	}
 
-	var width = 1280,
-	    height = 300;
+	// var width = 1280,
+	//     height = 300;
 
-	var stack = d3.layout.stack()
-	    .offset("wiggle")
-	    .values(function(d) { return d.values; });
+	// processing fun
+	var canvas = document.getElementsByTagName('canvas')[0];
+		var width = 600;
 
-	var svg = d3.select("#hashtag-plot").append("svg")
-	    .attr("width", width)
-	    .attr("height", height);
+		function sketch(p) {
+			var data = []
+			var y = [10, 50, 10, 20, 50, 250]; // the y-values of our vertices
+			var xSpacing = width/(y.length-1); // the spacing between our vertices
 
-	var x = d3.scale.linear()
-	    .domain([0, 8])
-	    .range([0, width]);
+			for (var i = 0; i < y.length; i++) {
+				data[i] = {'x': i*xSpacing, 'y': y[i]}; // use a dictionary for easy x, y access
+			}
+			
+			function plot(data) {
+				p.fill(255, 0, 0);
+				p.noStroke();
 
-	var y = d3.scale.linear()
-	    .domain([0, d3.max(plotLayers, function(layer) { return d3.max(layer, function(d) { return d.y0 + d.y; }); })])
-	    .range([height, 0]);
+				var plot = p.beginShape();
 
-	var color = d3.scale.linear()
-	    .range(["#aad", "#556"]);
+				for (var i = 0; i < data.length; i++) {
+					p.vertex(data[i].x, data[i].y);
+				}
+				p.vertex(data[data.length-1].x, 0); // add a point at the bottom right corner
+				p.vertex(0, 0); // add a point at the origin
 
-	var area = d3.svg.area()
-	    .x(function(d) { return x(d.x); })
-	    .y0(function(d) { return y(d.y0); })
-	    .y1(function(d) { return y(d.y0 + d.y); });
+				p.endShape();
+			}
 
-	svg.selectAll("path")
-	    .data(stack(plotLayers))
-	  	.enter().append("path")
-	  	.attr("d", area)
-    	.style("fill", function() { return color(Math.random()); });;
+			function normalizeCoordinates() {
+				// flip Processing's weird coordinate system with (0, 0) in the top left
+				p.translate(0, p.height)
+				p.scale(1, -1);
+			}
+
+			function setup() {
+				p.size(width, p.max(y)*1.25); // scale our sketch to be a bit bigger than our tallest y
+			}
+
+			function draw () {
+				normalizeCoordinates();
+
+				plot(data);
+			}
+
+			// tell Processing which functions to use for our setup and draw
+			p.setup = setup;
+			p.draw = draw;
+		}
+
+		var p = new Processing(canvas, sketch); // actually attach and run the sketch
 
 };
 
